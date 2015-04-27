@@ -1,0 +1,60 @@
+# Test program for Power Line Fire MonteCarlo Ruby classes
+#
+require 'test/unit'
+require 'MonteCarlo'
+require 'PLFire_MonteCarlo'
+
+def fire_size_distribution (x)
+  #  This is the fit of the power line fire distribution, valid between x of 2.0 and 5.2. x is the base 10 log of the fire size in hectares
+    a = -0.42
+    b = 2.0
+    y = 10**(a*x + b)
+end
+
+def factorial(i_val)
+    fact = 1
+    i_val.step(1,-1) {|f_val|
+      fact *= f_val
+      }
+    return fact
+end
+  
+def poisson(r, mu)  
+  if !r.integer? then 
+    puts "***ERROR - Poisson value r must be an integer"
+    raise
+  end
+  p = (mu**r)*Math::exp(-mu)/factorial(r)
+end
+
+def mc_poisson(r)
+  imctmp = InsuranceMonteCarlo.new()
+  imctmp.read_data_file()       # This is a BAD implementation, but can find no other way to pass in info with one variable.
+  tfire = Hash.new
+  tfire = imctmp.get_fire_model()
+  fire_rate = tfire["N_FIRES"].to_f/ tfire["YEARS_HISTORY"].to_f 
+  poisson(r,fire_rate)
+end
+
+class TestPLFMonteCarlo < Test::Unit::TestCase
+	def test_create
+		assert_nothing_raised()     { mc1 = InsuranceMonteCarlo.new}
+	end
+	
+  def test_read_data
+    mc2 = InsuranceMonteCarlo.new
+    assert_raise(RuntimeError) {mc2.read_data_file("doesntexist.dat")}     # Error if non-existent
+    garbage = File.new("garbage.dat","w")
+    garbage.print("This is so not good")
+    garbage.close
+    assert_raise(RuntimeError) {mc2.read_data_file("garbage.dat")}                     # Will find bad file format
+    assert_nothing_raised() {mc2.read_data_file("insurance.dat")}            # Assumes insurance.dat is there
+    mc2.read_data_file("insurance.dat")
+    assert_equal(mc2.fire_model["N_RUNS"],mc2.insurance_data["N_RUNS"].to_i)
+    assert_equal(mc2.insurance_model["max_utility"], mc2.insurance_data["MAX_UTILITY_M"].to_f   * 1000000.0)
+  end
+  
+  
+  
+end
+

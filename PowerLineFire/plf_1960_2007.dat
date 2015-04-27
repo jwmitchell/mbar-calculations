@@ -1,0 +1,17 @@
+N_RUNS = 1000
+YEARS_HISTORY = 48
+YEARS_FUTURE = 25
+NFIRES = 15
+MIN_SIZE = 2.0        # Minimum and maximum fire sizes, in log10 hectares.
+MAX_SIZE = 5.2
+MAX_COST = 10.0       # Log10 of the maximum fire cost, in dollars. Assume cost scales with size.
+DED_INSURER_M = 10.0
+DED_WEBA_M = 10.0
+MAX_INSURER_M = 966.0
+MAX_UTILITY_M = 25.0
+THRESH_WEBA_COPAY_M = 1000.0
+PERCENT_UTILITY_COPAY = 0.0
+PERCENT_WEBA_COPAY = 5.0
+COST_WEBA_ANNUAL = 0.0 
+COST_INSURANCE_ANNUAL = 0.0
+WEIGHTING = 0.3

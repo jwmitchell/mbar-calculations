@@ -1,0 +1,86 @@
+# Histogram class is designed to bin (x,y) data.  
+# v0.1 - The first version has simple fill, printout functions. 
+class Histogram
+	attr_reader :outside, :hist
+	def initialize(x_lo, x_hi, n_x_bins, y_lo, y_hi, n_y_bins)
+		if x_hi <= x_lo || y_hi <= y_lo then
+			puts "ERROR - Upper end of range less than lower: X (#{x_lo}, #{x_hi}) Y (#{y_lo}, #{y_hi})"
+			raise
+		end
+		if !(n_x_bins.integer?) || !(n_y_bins.integer?) then
+			puts "ERROR - bin numbers need to be integers: #{n_x_bins}, #{n_y_bins}"
+			raise
+		end
+		i = 0;          	j = 0
+		@hist = Array.new()
+		(0..(n_x_bins-1)).each do | i | 
+			@hist[i] = Array.new()
+			(0..(n_y_bins-1)).each do | j |
+				@hist[i][j] = 0.0
+			end
+		end
+		@x_lo = x_lo;  @x_hi = x_hi;   @n_x_bins = n_x_bins
+		@y_lo = y_lo;  @y_hi = y_hi;   @n_y_bins = n_y_bins
+		@bin_x = (@x_hi - @x_lo) / @n_x_bins
+		@bin_y = (@y_hi - @y_lo) / @n_y_bins
+		@outside = Array.new()
+		(0..2).each do |i|
+			@outside[i] = Array.new()
+			(0..2).each do |j|
+				@outside[i][j] = 0
+			end
+		end
+	end
+	def fill(x, y, weight)
+		if (x < @x_lo) : x_out = 0
+		elsif (x > @x_hi) : x_out = 2
+		else x_out = 1
+		end
+		if (y < @y_lo) : y_out = 0
+		elsif (y > @y_hi) : y_out = 2
+		else y_out = 1
+		end
+		@outside[x_out][y_out] += 1
+		unless (x_out == 1 && y_out == 1) then 
+			return
+		end
+		# Unusual feature: interpret x or y as bin number if it is an integer. Otherwise calculate bin #.
+		x_i = x.integer? ? x : get_xbin(x)
+		y_i = y.integer? ? y : get_ybin(y)
+		@hist[x_i][y_i] += weight
+	end
+	def get_xbin (x) 
+		if (x < @x_lo) : nbin = -1
+		elsif (x > @x_hi) : nbin = -999
+		else
+			nbin = (((x - @x_lo) / (@x_hi - @x_lo)) * @n_x_bins - 0.000001).to_int 
+		end
+	end
+	def get_ybin (y) 
+		if (y < @y_lo) : nbin =  -1
+		elsif (y > @y_hi) : nbin = -999
+		else
+			nbin = (((y - @y_lo) / (@y_hi - @y_lo)) * @n_y_bins - 0.000001).to_int 
+		end
+	end
+	def out_hist
+		@hist.each {|hist_val|
+			histx.each {|hist|
+				print "#{hist_val}  "
+			}
+			print "\n"
+		}
+	end
+	def out_gpl
+		xctr = 0.5
+		yctr = 0.5
+		@hist.each {|histx|
+			histx.each {|hist_val|
+				print "#{xctr}  #{yctr}  #{hist_val} \n"
+				yctr += 1
+			}
+			yctr = 0.5
+			xctr += 1
+		}
+	end
+end
